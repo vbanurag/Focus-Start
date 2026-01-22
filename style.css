@@ -1,0 +1,404 @@
+:root {
+    --bg-overlay: rgba(0, 0, 0, 0.3);
+    --text-color: #ffffff;
+    --font-primary: 'Inter', sans-serif;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    color: var(--text-color);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #333;
+    /* Fallback */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 1s ease-in-out;
+}
+
+/* Background pseudo-element for dimming if needed, mainly controlled via JS logic or body bg directly */
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    z-index: 0;
+}
+
+main,
+footer {
+    z-index: 1;
+    text-align: center;
+}
+
+.center-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    backdrop-filter: blur(0px);
+    /* Can add subtle blur if needed */
+}
+
+.clock {
+    font-size: 10rem;
+    font-weight: 600;
+    letter-spacing: -4px;
+    line-height: 1;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.greeting {
+    font-size: 3rem;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.focus-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 600px;
+}
+
+.focus-container h3 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    opacity: 0.9;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#focus-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #fff;
+    color: #fff;
+    font-size: 2rem;
+    text-align: center;
+    padding: 0.5rem;
+    width: 80%;
+    outline: none;
+    font-family: inherit;
+    transition: width 0.3s ease;
+}
+
+#focus-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#focus-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 2rem;
+    background: var(--glass-bg);
+    padding: 0.5rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+#focus-display:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#focus-display.hidden {
+    display: none;
+}
+
+#focus-check {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    accent-color: #fff;
+}
+
+#focus-text {
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+#focus-delete {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-left: 0.5rem;
+}
+
+#focus-display:hover #focus-delete {
+    opacity: 1;
+}
+
+.bottom-container {
+    position: absolute;
+    bottom: 2rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.quote-container {
+    max-width: 700px;
+    padding: 0 20px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.quote-container:hover {
+    transform: translateY(-2px);
+}
+
+#quote-text {
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+#quote-author {
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+}
+
+.fade-in-delay {
+    animation: fadeIn 1s ease-out 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .clock {
+        font-size: 6rem;
+    }
+
+    .greeting {
+        font-size: 2rem;
+    }
+}
+
+/* Wallpaper Refresh Button */
+.refresh-bg-container {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 10;
+}
+
+#refresh-bg {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: transform 0.3s ease, color 0.3s ease;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+#refresh-bg:hover {
+    color: #fff;
+    transform: rotate(180deg);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Todo List Styles */
+.todo-container {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 100;
+}
+
+.todo-toggle {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: opacity 0.3s;
+    font-family: inherit;
+    padding: 5px 10px;
+}
+
+.todo-toggle:hover {
+    opacity: 0.8;
+}
+
+.todo-panel {
+    position: absolute;
+    bottom: 40px;
+    right: 0;
+    width: 300px;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transform-origin: bottom right;
+}
+
+.todo-panel.hidden {
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+}
+
+.todo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px 10px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.todo-header h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+.todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    color: #fff;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.todo-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.todo-checkbox {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+    margin-right: 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.todo-checkbox:checked {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.todo-checkbox:checked::after {
+    content: '✓';
+    font-size: 12px;
+    color: #333;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
+.todo-text {
+    flex-grow: 1;
+    cursor: default;
+    word-break: break-word;
+}
+
+.todo-text.completed {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.todo-delete {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0 5px;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.todo-item:hover .todo-delete {
+    opacity: 1;
+}
+
+.todo-delete:hover {
+    color: #ff6b6b;
+}
+
+#todo-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 10px;
+    font-size: 0.9rem;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+}
+
+#todo-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}

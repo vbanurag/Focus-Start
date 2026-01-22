@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Focus Start",
+  "version": "1.0",
+  "description": "A serene dashboard for your new tab. Focus, calm your mind, and stay balanced.",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://source.unsplash.com/*",
+    "https://dummyjson.com/*",
+    "https://picsum.photos/*"
+  ],
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}
