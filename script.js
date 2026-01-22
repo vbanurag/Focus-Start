@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Todo Feature
     initTodo();
+
+    // Weather Feature
+    initWeather();
 });
 
 function updateTime() {
@@ -51,14 +54,14 @@ function updateGreeting() {
     }
 
     // Attempt to get name from storage or default
-    const name = localStorage.getItem('momentum_name') || 'User';
+    const name = localStorage.getItem('focus_name') || 'User';
     document.getElementById('greeting').innerText = `${greeting}, ${name}.`;
 
     // Allow name editing on double click (simple feature)
     document.getElementById('greeting').addEventListener('dblclick', () => {
         const newName = prompt('What is your name?');
         if (newName) {
-            localStorage.setItem('momentum_name', newName);
+            localStorage.setItem('focus_name', newName);
             document.getElementById('greeting').innerText = `${greeting}, ${newName}.`;
         }
     });
@@ -111,8 +114,8 @@ function setFallbackBackground() {
 }
 
 function loadFocus() {
-    const focus = localStorage.getItem('momentum_focus');
-    const completed = localStorage.getItem('momentum_focus_completed') === 'true';
+    const focus = localStorage.getItem('focus_focus');
+    const completed = localStorage.getItem('focus_focus_completed') === 'true';
 
     if (focus) {
         showFocusDisplay(focus, completed);
@@ -121,8 +124,8 @@ function loadFocus() {
 
 function setFocus(text) {
     if (!text.trim()) return;
-    localStorage.setItem('momentum_focus', text);
-    localStorage.setItem('momentum_focus_completed', 'false');
+    localStorage.setItem('focus_focus', text);
+    localStorage.setItem('focus_focus_completed', 'false');
     showFocusDisplay(text, false);
     document.getElementById('focus-input').value = '';
 }
@@ -147,7 +150,7 @@ function showFocusDisplay(text, completed) {
 }
 
 function toggleFocusComplete(checked) {
-    localStorage.setItem('momentum_focus_completed', checked);
+    localStorage.setItem('focus_focus_completed', checked);
     const textSpan = document.getElementById('focus-text');
     if (checked) {
         textSpan.classList.add('completed');
@@ -157,8 +160,8 @@ function toggleFocusComplete(checked) {
 }
 
 function deleteFocus() {
-    localStorage.removeItem('momentum_focus');
-    localStorage.removeItem('momentum_focus_completed');
+    localStorage.removeItem('focus_focus');
+    localStorage.removeItem('focus_focus_completed');
 
     document.getElementById('focus-display').classList.add('hidden');
     document.getElementById('focus-input').style.display = 'block';
@@ -248,12 +251,12 @@ function initTodo() {
 }
 
 function getTodos() {
-    const todos = localStorage.getItem('momentum_todos');
+    const todos = localStorage.getItem('focus_todos');
     return todos ? JSON.parse(todos) : [];
 }
 
 function saveTodos(todos) {
-    localStorage.setItem('momentum_todos', JSON.stringify(todos));
+    localStorage.setItem('focus_todos', JSON.stringify(todos));
 }
 
 function addTodo(text) {
@@ -316,6 +319,114 @@ function renderTodos() {
         li.appendChild(span);
         li.appendChild(deleteBtn);
 
+
         todoList.appendChild(li);
     });
+}
+
+// Weather Feature
+function initWeather() {
+    const weatherIcon = document.getElementById('weather-icon');
+    const weatherTemp = document.getElementById('weather-temp');
+    const weatherLocation = document.getElementById('weather-location');
+    const weatherDesc = document.getElementById('weather-desc');
+
+    if (!navigator.geolocation) {
+        weatherDesc.textContent = 'Geolocation not supported';
+        weatherDesc.classList.remove('hidden');
+        return;
+    }
+
+    // Check for cached data first to avoid unnecessary API calls
+    const cachedWeather = localStorage.getItem('focus_weather');
+    if (cachedWeather) {
+        const data = JSON.parse(cachedWeather);
+        // Refresh if older than 1 hour
+        if (Date.now() - data.timestamp < 3600000) {
+            updateWeatherUI(data);
+        } else {
+            fetchWeather();
+        }
+    } else {
+        fetchWeather();
+    }
+
+    function fetchWeather() {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            try {
+                // Parallel fetch for weather and location
+                // Open-Meteo API (No auth required)
+                const weatherPromise = fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                // BigDataCloud Reverse Geocoding (No auth required for client-side)
+                const locationPromise = fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+
+                const [weatherRes, locationRes] = await Promise.all([weatherPromise, locationPromise]);
+                const weatherData = await weatherRes.json();
+                const locationData = await locationRes.json();
+
+                if (weatherData.current_weather) {
+                    const data = {
+                        temp: weatherData.current_weather.temperature,
+                        code: weatherData.current_weather.weathercode,
+                        city: locationData.city || locationData.locality || 'Unknown',
+                        timestamp: Date.now()
+                    };
+
+                    localStorage.setItem('focus_weather', JSON.stringify(data));
+                    updateWeatherUI(data);
+                }
+            } catch (error) {
+                console.error('Weather/Location fetch error:', error);
+            }
+        }, (error) => {
+            console.error('Geolocation error:', error);
+            weatherDesc.textContent = 'Loc access denied';
+            weatherDesc.classList.remove('hidden');
+        });
+    }
+
+    function updateWeatherUI(data) {
+        weatherTemp.textContent = `${Math.round(data.temp)}°C`;
+        const { icon, label } = getWeatherInfo(data.code);
+        weatherIcon.textContent = icon;
+        weatherIcon.title = label;
+        if (data.city) {
+            weatherLocation.textContent = data.city;
+        }
+    }
+}
+
+function getWeatherInfo(code) {
+    // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
+    const codes = {
+        0: { icon: '☀️', label: 'Clear sky' },
+        1: { icon: '🌤️', label: 'Mainly clear' },
+        2: { icon: '⛅', label: 'Partly cloudy' },
+        3: { icon: '☁️', label: 'Overcast' },
+        45: { icon: '🌫️', label: 'Fog' },
+        48: { icon: '🌫️', label: 'Depositing rime fog' },
+        51: { icon: '🌦️', label: 'Light drizzle' },
+        53: { icon: '🌦️', label: 'Moderate drizzle' },
+        55: { icon: '🌧️', label: 'Dense drizzle' },
+        61: { icon: '🌧️', label: 'Slight rain' },
+        63: { icon: '🌧️', label: 'Moderate rain' },
+        65: { icon: '🌧️', label: 'Heavy rain' },
+        71: { icon: '🌨️', label: 'Slight snow' },
+        73: { icon: '🌨️', label: 'Moderate snow' },
+        75: { icon: '❄️', label: 'Heavy snow' },
+        77: { icon: '🌨️', label: 'Snow grains' },
+        80: { icon: '🌦️', label: 'Slight rain showers' },
+        81: { icon: '🌧️', label: 'Moderate rain showers' },
+        82: { icon: '🌧️', label: 'Violent rain showers' },
+        85: { icon: '🌨️', label: 'Slight snow showers' },
+        86: { icon: '❄️', label: 'Heavy snow showers' },
+        95: { icon: '⛈️', label: 'Thunderstorm' },
+        96: { icon: '⛈️', label: 'Thunderstorm with slight hail' },
+        99: { icon: '⛈️', label: 'Thunderstorm with heavy hail' }
+    };
+
+    return codes[code] || { icon: '🌡️', label: 'Unknown' };
 }

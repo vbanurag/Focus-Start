@@ -402,3 +402,57 @@ footer {
 #todo-input::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
+
+/* Weather Widget */
+.weather-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    cursor: default;
+    z-index: 100;
+    transition: opacity 0.3s ease;
+}
+
+.weather-container:hover {
+    opacity: 1;
+}
+
+#weather-icon {
+    font-size: 1.4rem;
+}
+
+#weather-temp {
+    font-weight: 600;
+}
+
+#weather-location {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-left: 2px;
+    font-weight: 400;
+}
+
+#weather-desc {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Mobile responsive tweak */
+@media (max-width: 768px) {
+    .weather-container {
+        font-size: 0.9rem;
+        top: 15px;
+        left: 15px;
+    }
+
+    #weather-icon {
+        font-size: 1.2rem;
+    }
+}

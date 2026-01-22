@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,13 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="background-overlay"></div>
-    
+
     <main class="center-container fade-in">
         <div id="clock" class="clock">12:00</div>
         <div id="greeting" class="greeting">Good afternoon, Anurag</div>
-        
+
         <div class="focus-container">
             <h3>What is your main focus for today?</h3>
             <input type="text" id="focus-input" autocomplete="off" />
@@ -52,12 +54,22 @@
 
     <div class="refresh-bg-container">
         <button id="refresh-bg" title="Refresh Wallpaper" aria-label="Refresh Wallpaper">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
             </svg>
         </button>
     </div>
 
+    <!-- Weather Widget -->
+    <div id="weather-container" class="weather-container">
+        <span id="weather-icon"></span>
+        <span id="weather-temp"></span>
+        <span id="weather-location"></span>
+        <span id="weather-desc" class="hidden"></span>
+    </div>
+
     <script src="script.js"></script>
 </body>
+
 </html>
