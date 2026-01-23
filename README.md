@@ -2,7 +2,7 @@
 
 **Focus Start** is a serene, beautiful personal dashboard that replaces your new tab page. It is designed to help you calm your mind, sharpen your focus, and stay organized throughout the day.
 
-![Focus Start Promo](assets/SS2.jpg)
+![Focus Start Promo](assets/SS2.png)
 
 ## Features
 
