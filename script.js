@@ -27,11 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
         setBackground(true);
     });
 
+    // Quote Refresh
+    document.getElementById('refresh-quote').addEventListener('click', () => {
+        const quoteText = document.getElementById('quote-text');
+        quoteText.style.opacity = '0.5';
+        loadQuote(true).then(() => {
+            quoteText.style.opacity = '1';
+        });
+    });
+
     // Todo Feature
     initTodo();
 
     // Weather Feature
     initWeather();
+
+    // Hacker News Feature
+    initHN();
 });
 
 function updateTime() {
@@ -53,16 +65,39 @@ function updateGreeting() {
         greeting = 'Good afternoon';
     }
 
-    // Attempt to get name from storage or default
-    const name = localStorage.getItem('focus_name') || 'User';
-    document.getElementById('greeting').innerText = `${greeting}, ${name}.`;
+    document.getElementById('greeting-text').textContent = greeting;
 
-    // Allow name editing on double click (simple feature)
-    document.getElementById('greeting').addEventListener('dblclick', () => {
-        const newName = prompt('What is your name?');
+    // Name Handling
+    const nameEl = document.getElementById('name-text');
+    const savedName = localStorage.getItem('focus_name');
+
+    if (savedName) {
+        nameEl.textContent = savedName;
+    }
+
+    // Clear "User" on focus for easier editing
+    nameEl.addEventListener('focus', () => {
+        if (nameEl.textContent === 'User') {
+            nameEl.textContent = '';
+        }
+    });
+
+    // Save on blur (focus lost)
+    nameEl.addEventListener('blur', () => {
+        const newName = nameEl.textContent.trim();
         if (newName) {
             localStorage.setItem('focus_name', newName);
-            document.getElementById('greeting').innerText = `${greeting}, ${newName}.`;
+        } else {
+            // Revert to default or saved if empty
+            nameEl.textContent = localStorage.getItem('focus_name') || 'User';
+        }
+    });
+
+    // Save on Enter key and blur
+    nameEl.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            nameEl.blur();
         }
     });
 }
@@ -168,13 +203,13 @@ function deleteFocus() {
     document.querySelector('.focus-container h3').innerText = 'What is your main focus for today?';
 }
 
-async function loadQuote() {
+async function loadQuote(forceNew = false) {
     const today = new Date().toDateString();
     const savedDate = localStorage.getItem('quote_date');
     const savedQuote = localStorage.getItem('quote_text');
     const savedAuthor = localStorage.getItem('quote_author');
 
-    if (savedDate === today && savedQuote) {
+    if (!forceNew && savedDate === today && savedQuote) {
         document.getElementById('quote-text').innerText = `“${savedQuote}”`;
         document.getElementById('quote-author').innerText = savedAuthor;
         return;
@@ -429,4 +464,71 @@ function getWeatherInfo(code) {
     };
 
     return codes[code] || { icon: '🌡️', label: 'Unknown' };
+}
+
+// Hacker News Feature
+function initHN() {
+    const hnList = document.getElementById('hn-list');
+    const refreshBtn = document.getElementById('refresh-hn');
+
+    loadStories();
+
+    refreshBtn.addEventListener('click', () => {
+        hnList.innerHTML = '<li>Refreshing...</li>';
+        loadStories(true);
+    });
+
+    async function loadStories(forceRefresh = false) {
+        const cached = localStorage.getItem('focus_hn_cache');
+        if (!forceRefresh && cached) {
+            const data = JSON.parse(cached);
+            if (Date.now() - data.timestamp < 600000) { // 10 minutes cache
+                renderStories(data.stories);
+                return;
+            }
+        }
+
+        try {
+            // Fetch top 500 IDs, take top 5
+            const response = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty');
+            const ids = await response.json();
+            const top5Ids = ids.slice(0, 5);
+
+            const storyPromises = top5Ids.map(id =>
+                fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`).then(res => res.json())
+            );
+
+            const stories = await Promise.all(storyPromises);
+
+            const simplifiedStories = stories.map(s => ({
+                title: s.title,
+                url: s.url || `https://news.ycombinator.com/item?id=${s.id}`
+            }));
+
+            localStorage.setItem('focus_hn_cache', JSON.stringify({
+                timestamp: Date.now(),
+                stories: simplifiedStories
+            }));
+
+            renderStories(simplifiedStories);
+        } catch (error) {
+            console.error('HN Fetch Error:', error);
+            hnList.innerHTML = '<li>Error loading news</li>';
+        }
+    }
+
+    function renderStories(stories) {
+        hnList.innerHTML = '';
+        stories.forEach(story => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = story.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = story.title;
+            a.title = story.title; // Tooltip for long titles
+            li.appendChild(a);
+            hnList.appendChild(li);
+        });
+    }
 }

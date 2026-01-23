@@ -16,7 +16,10 @@
 
     <main class="center-container fade-in">
         <div id="clock" class="clock">12:00</div>
-        <div id="greeting" class="greeting">Good afternoon, Anurag</div>
+        <div class="greeting">
+            <span id="greeting-text">Good afternoon</span>,
+            <span id="name-text" contenteditable="true" spellcheck="false">User</span>.
+        </div>
 
         <div class="focus-container">
             <h3>What is your main focus for today?</h3>
@@ -33,6 +36,7 @@
         <div id="quote-container" class="quote-container">
             <p id="quote-text">“The secret of getting ahead is getting started.”</p>
             <span id="quote-author">Mark Twain</span>
+            <button id="refresh-quote" title="New Quote" aria-label="New Quote">↻</button>
         </div>
     </footer>
 
@@ -50,6 +54,16 @@
             </ul>
             <input type="text" id="todo-input" placeholder="New Todo" autocomplete="off" />
         </div>
+    </div>
+
+    <div id="hn-container" class="hn-container">
+        <div class="hn-header">
+            <h4>Top 5 Hacker News</h4>
+            <button id="refresh-hn" title="Refresh News">↻</button>
+        </div>
+        <ul id="hn-list" class="hn-list">
+            <li>Loading...</li>
+        </ul>
     </div>
 
     <div class="refresh-bg-container">
