@@ -84,13 +84,18 @@ function updateGreeting() {
 
     // Save on blur (focus lost)
     nameEl.addEventListener('blur', () => {
-        const newName = nameEl.textContent.trim();
-        if (newName) {
-            localStorage.setItem('focus_name', newName);
-        } else {
-            // Revert to default or saved if empty
-            nameEl.textContent = localStorage.getItem('focus_name') || 'User';
+        let newName = nameEl.textContent.trim();
+        // If empty, try to get from storage, else default to 'User'
+        if (!newName) {
+            newName = localStorage.getItem('focus_name') || 'User';
         }
+
+        // Save effectively
+        if (newName !== 'User') {
+            localStorage.setItem('focus_name', newName);
+        }
+
+        nameEl.textContent = newName;
     });
 
     // Save on Enter key and blur
@@ -263,18 +268,23 @@ function initTodo() {
     // Load todos
     renderTodos();
 
+    // Load panel state
+    const isTodoOpen = localStorage.getItem('focus_todo_open') === 'true';
+    if (isTodoOpen) {
+        todoPanel.classList.remove('hidden');
+    } else {
+        todoPanel.classList.add('hidden');
+    }
+
     // Toggle Panel
     todoToggle.addEventListener('click', (e) => {
         e.stopPropagation();
-        todoPanel.classList.toggle('hidden');
+        const isHidden = todoPanel.classList.toggle('hidden');
+        localStorage.setItem('focus_todo_open', !isHidden);
     });
 
-    // Close panel when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!todoPanel.contains(e.target) && !todoToggle.contains(e.target) && !todoPanel.classList.contains('hidden')) {
-            todoPanel.classList.add('hidden');
-        }
-    });
+    // Close panel logic removed to allow user to choose when to open/close explicitly
+    // document.addEventListener('click', (e) => { ... });
 
     // Add Todo
     todoInput.addEventListener('keypress', (e) => {
